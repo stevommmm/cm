@@ -9,9 +9,11 @@ import (
 	"net/url"
 	"os"
 	"time"
+	"syscall"
 
 	"github.com/leberKleber/go-mpris"
 	"golang.org/x/image/draw"
+	"golang.org/x/term"
 )
 
 const (
@@ -32,6 +34,11 @@ func renderLoop(p *mpris.Player) {
 	if err != nil {
 		return
 	}
+	_, h, err := term.GetSize(syscall.Stdout);
+	if err == nil {
+		album_art_max = h*2
+	}
+
 	dst := image.NewRGBA(image.Rect(0, 0, album_art_max, album_art_max))
 
 	// Try and parse supplied media url, otherwise use our blank image
