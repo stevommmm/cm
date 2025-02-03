@@ -8,8 +8,8 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"time"
 	"syscall"
+	"time"
 
 	"github.com/leberKleber/go-mpris"
 	"golang.org/x/image/draw"
@@ -25,6 +25,11 @@ const (
 )
 
 var (
+	ANSI_STATUS_SYM = map[mpris.PlaybackStatus]string{
+		mpris.PlaybackStatusPlaying: "⏵",
+		mpris.PlaybackStatusPaused:  "⏸",
+		mpris.PlaybackStatusStopped: "⏹",
+	}
 	mpris_player  string
 	album_art_max int = 20
 )
@@ -34,9 +39,9 @@ func renderLoop(p *mpris.Player) {
 	if err != nil {
 		return
 	}
-	_, h, err := term.GetSize(syscall.Stdout);
+	_, h, err := term.GetSize(syscall.Stdout)
 	if err == nil {
-		album_art_max = h*2
+		album_art_max = h * 2
 	}
 
 	dst := image.NewRGBA(image.Rect(0, 0, album_art_max, album_art_max))
@@ -78,6 +83,11 @@ func renderLoop(p *mpris.Player) {
 		case 4:
 			album, _ := m.XESAMAlbum()
 			fmt.Printf(" %s\n", album)
+		case 6:
+			status, err := p.PlaybackStatus()
+			if err == nil {
+				fmt.Printf(" \x1b[1m%s\x1b[0m\n", ANSI_STATUS_SYM[status])
+			}
 		case album_art_max - 2:
 			// no newline
 		default:
